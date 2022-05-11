@@ -1,19 +1,30 @@
+from flatten_json import flatten
 import scrapy
 from scrapy.utils.project import get_project_settings
+from crawler.items import MovieItem
 import json
+
 
 
 class JustWatch(scrapy.Spider):
     settings = get_project_settings()
     name = "justwatch"
     file_path = settings.get('FILE_PATH')
+
     custom_settings = {
         'FEED_URI': f'downloads/{name}.csv',
-        'FEED_FORMAT': 'csv'
+        'FEED_FORMAT': 'csv',
+        'AUTOTHROTTLE_ENABLED': True,
+        'AUTOTHROTTLE_START_DELAY': 1,
+        'AUTOTHROTTLE_MAX_DELAY': 4,
+        'AUTOTHROTTLE_TARGET_CONCURRENCY': 1.0,
+        'DOWNLOADER_MIDDLEWARES': {
+            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 200,
+            'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
+            'random_useragent.RandomUserAgentMiddleware': 403,
+        }
     }
-    headers = {}
-    
-    big_data = []
+
     
     
 
@@ -86,7 +97,7 @@ class JustWatch(scrapy.Spider):
         next_cursor = data.get("data").get("popularTitles").get("pageInfo").get("endCursor")
         for movie in movies_array:
             movie_id = movie.get("node").get("objectId")
-            yield scrapy.Request(method="GET",url=f"https://apis.justwatch.com/content/titles/movie/{movie_id}/locale/pt_BR?language=pt", callback=self.crawl_movie_data,headers=self.header,meta=movie)
+            yield scrapy.Request(method="GET",url=f"https://apis.justwatch.com/content/titles/movie/{movie_id}/locale/pt_BR?language=pt", callback=self.crawl_movie_api_data,headers=self.header,meta=movie)
         
         if has_next is True:
             yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload(next_cursor))
@@ -94,6 +105,65 @@ class JustWatch(scrapy.Spider):
     
         
     def crawl_movie_api_data(self,response):
-        print(response)
+        data = (response.json())
+        response.meta.update(data)
+        response.meta['api_url'] = response.url
+        movie_path = data.get("full_path")
 
-        return None
+        yield scrapy.Request(method="GET",url=f"https://www.justwatch.com{movie_path}", callback=self.crawl_webpage_data,headers=self.header,meta=response.meta)
+    
+    def count_actor_genre(self,response):
+        
+        return 10
+    
+    def crawl_webpage_data(self,response):
+        justwatchScore = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[1]/div[2]/div/div[1]/a/text()").get()
+        response.meta['justwatchScore'] = justwatchScore
+        response.meta['website_url'] = response.url
+        movie_genre = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[2]/div[2]/span[1]/text()").get()
+        response.meta['movie_genre'] = movie_genre
+        
+        
+        yield self.return_movie_data(response.meta)        
+        
+    
+    def return_movie_data(self,data):
+        
+        item = MovieItem()
+        scoring = data.get("scoring")
+        if scoring is not None:
+            for score in scoring:
+                if score.get("provider_type") == 'imdb:votes':
+                    item['imdbVotes'] = score.get("value")
+                elif score.get("provider_type") == 'tmdb:score':
+                    item['tmbdScore'] = score.get("value")
+                elif score.get("provider_type") == 'imdb:popularity':
+                    item['imbdPopularity'] = score.get("value")
+                elif score.get("provider_type") == 'tmdb:popularity':
+                    item['tmdbPopularity'] = score.get("value")
+
+        data = flatten(data)
+
+        item['imdbScore'] = data.get("node_content_scoring_imdbScore")
+        item['packageId'] = data.get("node_watchNowOffer_package_packageId")
+        item['packageName'] = data.get("node_watchNowOffer_package_clearName")
+        item['id'] = data.get("id")
+        item['title'] = data.get("title")
+        item['full_path'] = data.get("full_path")
+        item['website_url'] = data.get("website_url")
+        item['api_url'] = data.get("api_url")
+        item['short_description'] = data.get("short_description")
+        item['original_release_year'] = data.get("original_release_year")
+        item['object_type'] = data.get("object_type")
+        item['original_title'] = data.get("original_title")
+        item['movie_genre'] = data.get("movie_genre")
+        item['age_certification'] = data.get("age_certification")
+        if item['age_certification'] == "L":
+            item['age_certification'] = "0"
+        item['production_countrie'] = data.get("production_countries_0")
+        item['runtime'] = data.get('runtime')
+        item['justwatchScore'] = data.get("justwatchScore")
+        item['lower_title'] = data.get("original_title").lower().replace(" ","").replace("#","")
+        
+        
+        return item

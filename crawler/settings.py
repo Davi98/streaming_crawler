@@ -69,9 +69,9 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'random_useragent.RandomUserAgentMiddleware': 403,
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+    'flat.middlewares.TooManyRequestsRetryMiddleware': 543
 
 }
-
 
 # FEEDS = {
 #     f's3://your-bucket/path-to-data/{Spider.name}/data.json': {
@@ -93,6 +93,7 @@ DOWNLOADER_MIDDLEWARES = {
 # ITEM_PIPELINES = {
 #     'crawler.pipelines.DoctorPipeline': 1,
 # }
+# DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 200
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -120,7 +121,7 @@ DOWNLOAD_TIMEOUT = 200
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 LOG_ENABLED = False if ENVIRONMENT == 'prd'  else True
-LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'ERROR'
+LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'INFO'
 
 
 FILE_PATH = os.environ.get('FILE_PATH', 'downloads')
