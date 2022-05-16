@@ -1,7 +1,8 @@
+from cgitb import reset
 from flatten_json import flatten
 import scrapy
 from scrapy.utils.project import get_project_settings
-from crawler.items import MovieItem
+from crawler.items import JustWatchItem
 import json
 
 
@@ -45,11 +46,11 @@ class JustWatch(scrapy.Spider):
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
         }
 
-    def build_payload(self,cursor):
-        payload  = json.dumps({
+    def build_payload(self,cursor,package,releaseYearMin, releaseYearMax):
+        payload = json.dumps({
         "operationName": "GetPopularTitles",
         "variables": {
-            "popularTitlesSortBy": "ALPHABETICAL",
+            "popularTitlesSortBy": "POPULAR",
             "first": 40,
             "platform": "WEB",
             "sortRandomSeed": 0,
@@ -64,15 +65,19 @@ class JustWatch(scrapy.Spider):
             ],
             "productionCountries": [],
             "packages": [
-                "dnp","hbm","nfx","pmp","prv","srp","gop"
+                package
             ],
             "excludeIrrelevantTitles": False,
             "presentationTypes": [],
-            "monetizationTypes": []
+            "monetizationTypes": [],
+            "releaseYear": {
+                "min": releaseYearMin,
+                "max": releaseYearMax
+            }
             },
             "watchNowFilter": {
             "packages": [
-                "dnp","hbm","nfx","pmp","prv","srp","gop"
+                package
             ],
             "monetizationTypes": []
             },
@@ -87,20 +92,42 @@ class JustWatch(scrapy.Spider):
 
     def start_requests(self):
 
-        yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload(""))
+        packages = ["dnp","hbm","nfx","pmp","prv","srp","gop"]
+
+        for pack in packages:
+            if pack == "nfx":
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2018),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2018})
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2019,2022),meta={"package":pack,"releaseYearMin":2019,"releaseYearMax":2022})
+            elif pack == "prv":
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2015),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2015})
+        
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2022),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2022})   
+            else:
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2022),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2022})
+
+    
+        
+
         
 
     def crawl_catalog(self,response):
         data = (response.json())
+
         has_next = data.get("data").get("popularTitles").get("pageInfo").get("hasNextPage")
         movies_array = data.get("data").get("popularTitles").get("edges")
+        total = data.get("data").get("popularTitles").get("totalCount")
+
         next_cursor = data.get("data").get("popularTitles").get("pageInfo").get("endCursor")
         for movie in movies_array:
             movie_id = movie.get("node").get("objectId")
             yield scrapy.Request(method="GET",url=f"https://apis.justwatch.com/content/titles/movie/{movie_id}/locale/pt_BR?language=pt", callback=self.crawl_movie_api_data,headers=self.header,meta=movie)
-        
+
         if has_next is True:
-            yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload(next_cursor))
+            response.meta['package'] = response.meta.get("package")
+            response.meta['releaseYearMin'] =  response.meta.get("releaseYearMin")
+            response.meta['releaseYearMax'] =  response.meta.get("releaseYearMax")
+            
+            yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload(next_cursor,response.meta.get("package"),response.meta.get("releaseYearMin"),response.meta.get("releaseYearMax")),dont_filter=True,meta=response.meta)
         
     
         
@@ -110,11 +137,8 @@ class JustWatch(scrapy.Spider):
         response.meta['api_url'] = response.url
         movie_path = data.get("full_path")
 
-        yield scrapy.Request(method="GET",url=f"https://www.justwatch.com{movie_path}", callback=self.crawl_webpage_data,headers=self.header,meta=response.meta)
-    
-    def count_actor_genre(self,response):
-        
-        return 10
+        yield scrapy.Request(method="GET",url=f"https://www.justwatch.com{movie_path}", callback=self.crawl_webpage_data,headers=self.header,meta=response.meta,dont_filter=True)
+
     
     def crawl_webpage_data(self,response):
         justwatchScore = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[1]/div[2]/div/div[1]/a/text()").get()
@@ -129,7 +153,7 @@ class JustWatch(scrapy.Spider):
     
     def return_movie_data(self,data):
         
-        item = MovieItem()
+        item = JustWatchItem()
         scoring = data.get("scoring")
         if scoring is not None:
             for score in scoring:
@@ -141,18 +165,46 @@ class JustWatch(scrapy.Spider):
                     item['imbdPopularity'] = score.get("value")
                 elif score.get("provider_type") == 'tmdb:popularity':
                     item['tmdbPopularity'] = score.get("value")
+        
+        offers = data.get("offers")
+        
+        netflix = False
+        primevideo = False
+        disneyplus = False
+        hbomax = False
+        paramountplus = False
+        starplus = False
+        globoplay = False
 
+                        
+        if offers is not None:
+            for offer in offers:
+                if offer.get("monetization_type") == "flatrate":
+                    if offer.get("package_short_name") == "nfx":
+                        netflix = True
+                    elif offer.get("package_short_name") == "prv":
+                        primevideo = True
+                    elif offer.get("package_short_name") == "dnp":
+                        disneyplus = True
+                    elif offer.get("package_short_name") == "hbm":
+                        hbomax = True
+                    elif offer.get("package_short_name") == "pmp":
+                        paramountplus = True
+                    elif offer.get("package_short_name") == "srp":
+                        starplus = True
+                    elif offer.get("package_short_name") == "gop":
+                        globoplay = True
+
+        
         data = flatten(data)
 
         item['imdbScore'] = data.get("node_content_scoring_imdbScore")
-        item['packageId'] = data.get("node_watchNowOffer_package_packageId")
-        item['packageName'] = data.get("node_watchNowOffer_package_clearName")
+
         item['id'] = data.get("id")
         item['title'] = data.get("title")
         item['full_path'] = data.get("full_path")
         item['website_url'] = data.get("website_url")
         item['api_url'] = data.get("api_url")
-        item['short_description'] = data.get("short_description")
         item['original_release_year'] = data.get("original_release_year")
         item['object_type'] = data.get("object_type")
         item['original_title'] = data.get("original_title")
@@ -163,7 +215,16 @@ class JustWatch(scrapy.Spider):
         item['production_countrie'] = data.get("production_countries_0")
         item['runtime'] = data.get('runtime')
         item['justwatchScore'] = data.get("justwatchScore")
-        item['lower_title'] = data.get("original_title").lower().replace(" ","").replace("#","")
+        if data.get("original_title") is not None:
+            item['lower_title'] = data.get("original_title").lower().replace(" ","")
         
+        item['netflix'] = netflix
+        item['primevideo'] = primevideo
+        item['disneyplus'] = disneyplus
+        item['hbomax'] =  hbomax
+        item['paramountplus'] = paramountplus
+        item['starplus'] =  starplus
+        item['globoplay'] =  globoplay
+
         
         return item

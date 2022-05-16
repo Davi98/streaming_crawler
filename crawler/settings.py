@@ -93,7 +93,7 @@ DOWNLOADER_MIDDLEWARES = {
 # ITEM_PIPELINES = {
 #     'crawler.pipelines.DoctorPipeline': 1,
 # }
-# DOWNLOAD_DELAY = 1
+# DOWNLOAD_DELAY = 
 DOWNLOAD_TIMEOUT = 200
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -123,5 +123,6 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 LOG_ENABLED = False if ENVIRONMENT == 'prd'  else True
 LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'INFO'
 
+DUPEFILTER_DEBUG = True
 
 FILE_PATH = os.environ.get('FILE_PATH', 'downloads')

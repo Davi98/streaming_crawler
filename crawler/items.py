@@ -7,17 +7,14 @@ import scrapy
 from scrapy import Field
 
 
-class MovieItem(scrapy.Item):
+class JustWatchItem(scrapy.Item):
     
     imdbScore = Field()
-    packageId = Field()
-    packageName = Field()
     id = Field()
     title = Field()
     full_path = Field()
     website_url = Field()
     api_url = Field()
-    short_description = Field()
     original_release_year = Field()
     object_type = Field()
     original_title = Field()
@@ -31,5 +28,47 @@ class MovieItem(scrapy.Item):
     tmdbPopularity = Field()
     lower_title = Field()
     movie_genre = Field()
+    netflix = Field()
+    primevideo = Field()
+    disneyplus = Field()
+    hbomax = Field()
+    paramountplus = Field()
+    starplus = Field()
+    globoplay = Field()
 
 
+class LetterboxdItem(scrapy.Item):
+    
+    title = Field()
+    foreign_title = Field()
+    lower_title = Field()
+    lower_foreign_title = Field()
+    original_release_year = Field()
+    letterboxd_grade = Field()
+    number_reviews = Field()
+    number_grade = Field()
+    url = Field()
+    page_number = Field()
+    foreign = Field()
+
+
+class RottenTomatoesItem(scrapy.Item):
+    
+    title = Field()
+    audienceScore = Field()
+    audienceScore_sentiment = Field()
+    criticsScore = Field()
+    criticsScore_sentiment = Field()
+    criticsScore_certifiedAttribute = Field()
+    lower_title = Field()
+    
+class FilmowItem(scrapy.Item):
+    
+    title = Field()
+    lower_title = Field()
+    year = Field()
+    original_title = Field()
+    original_lower_title = Field()
+    score = Field()
+    number_votes = Field()
+    url = Field()
