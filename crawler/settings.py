@@ -121,7 +121,7 @@ DOWNLOAD_TIMEOUT = 200
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 LOG_ENABLED = False if ENVIRONMENT == 'prd'  else True
-LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'INFO'
+LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'DEBUG'
 
 DUPEFILTER_DEBUG = True
 

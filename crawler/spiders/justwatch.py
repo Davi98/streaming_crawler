@@ -97,13 +97,13 @@ class JustWatch(scrapy.Spider):
         for pack in packages:
             if pack == "nfx":
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2018),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2018})
-                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2019,2022),meta={"package":pack,"releaseYearMin":2019,"releaseYearMax":2022})
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2019,2023),meta={"package":pack,"releaseYearMin":2019,"releaseYearMax":2023})
             elif pack == "prv":
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2015),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2015})
         
-                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2022),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2022})   
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2023),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2023})   
             else:
-                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2022),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2022})
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2023),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
 
     
         

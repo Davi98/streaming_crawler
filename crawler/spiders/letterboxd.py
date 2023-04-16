@@ -40,8 +40,9 @@ class LetterBoxd(scrapy.Spider):
     def start_requests(self):
         yield scrapy.Request(method='GET',url=self.build_catalog_url(1),callback=self.start_navigate)
 
+
     def start_navigate(self,response):
-        number_movies = self.get_number_movies((response.xpath('/html/body/section/h2/text()').get()))
+        number_movies = self.get_number_movies((response.xpath('/html/body/section/p/text()').get()))
         number_pages = number_movies//72
         movies_links = response.css('li[data-average-rating]').xpath('./div/@data-target-link').extract()
         for link in movies_links:
