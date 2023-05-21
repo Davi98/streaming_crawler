@@ -12,8 +12,8 @@ class LetterBoxd(scrapy.Spider):
     file_path = settings.get('FILE_PATH')
 
     custom_settings = {
-        'FEED_URI': f'downloads/{name}.csv',
-        'FEED_FORMAT': 'csv',
+        
+        'FEEDS': {f'downloads/{name}.csv': {'format': 'csv', 'overwrite': True}},
         'AUTOTHROTTLE_ENABLED': True,
         'AUTOTHROTTLE_START_DELAY': 1,
         'AUTOTHROTTLE_MAX_DELAY': 4,

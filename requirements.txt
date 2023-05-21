@@ -1,3 +1,6 @@
 scrapy
 scrapy-random-useragent
 flatten_json
+bigquery
+python-dotenv
+google-cloud-storage

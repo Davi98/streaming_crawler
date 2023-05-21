@@ -52,7 +52,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 32
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-    'crawler.middlewares.CrawlerSpiderMiddleware': 543,
+    'crawler.middlewares.CrawlerSpiderMiddleware': 543
 }
 
 
@@ -68,8 +68,8 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 200,
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'random_useragent.RandomUserAgentMiddleware': 403,
-    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
-    'flat.middlewares.TooManyRequestsRetryMiddleware': 543
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None
+    # 'flat.middlewares.TooManyRequestsRetryMiddleware': 543
 
 }
 
@@ -81,6 +81,7 @@ DOWNLOADER_MIDDLEWARES = {
 #     }
 # }
 
+
 # FILES_STORE = 's3://your-bucket/path_to_files_dir/'
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -90,9 +91,10 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#     'crawler.pipelines.DoctorPipeline': 1,
-# }
+ITEM_PIPELINES = {
+    'crawler.pipelines.CrawlerPipeline': 1,
+}
+
 # DOWNLOAD_DELAY = 
 DOWNLOAD_TIMEOUT = 200
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -121,8 +123,6 @@ DOWNLOAD_TIMEOUT = 200
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 LOG_ENABLED = False if ENVIRONMENT == 'prd'  else True
-LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'DEBUG'
-
+LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'ERROR'
 DUPEFILTER_DEBUG = True
-
 FILE_PATH = os.environ.get('FILE_PATH', 'downloads')

@@ -4,17 +4,19 @@ import scrapy
 from scrapy.utils.project import get_project_settings
 from crawler.items import JustWatchItem
 import json
-
+import datetime
 
 
 class JustWatch(scrapy.Spider):
     settings = get_project_settings()
     name = "justwatch"
     file_path = settings.get('FILE_PATH')
+    exec_date = datetime.date.today().strftime("%d%m%Y")
 
     custom_settings = {
-        'FEED_URI': f'downloads/{name}.csv',
-        'FEED_FORMAT': 'csv',
+        # 'FEED_URI': f'downloads/{name}.csv',
+        # 'FEED_FORMAT': 'csv',
+        'FEEDS': {f'downloads/{name}.csv': {'format': 'csv', 'overwrite': True}},
         'AUTOTHROTTLE_ENABLED': True,
         'AUTOTHROTTLE_START_DELAY': 1,
         'AUTOTHROTTLE_MAX_DELAY': 4,
@@ -93,6 +95,7 @@ class JustWatch(scrapy.Spider):
     def start_requests(self):
 
         packages = ["dnp","hbm","nfx","pmp","prv","srp","gop"]
+        packages = ['pmp']
 
         for pack in packages:
             if pack == "nfx":
@@ -103,7 +106,7 @@ class JustWatch(scrapy.Spider):
         
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2023),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2023})   
             else:
-                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2023),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2023,2023),meta={"package":pack,"releaseYearMin":2023,"releaseYearMax":2023})
 
     
         
@@ -212,6 +215,7 @@ class JustWatch(scrapy.Spider):
         item['age_certification'] = data.get("age_certification")
         if item['age_certification'] == "L":
             item['age_certification'] = "0"
+            item['age_certification'] = int(item['age_certification'])
         item['production_countrie'] = data.get("production_countries_0")
         item['runtime'] = data.get('runtime')
         item['justwatchScore'] = data.get("justwatchScore")
