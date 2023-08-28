@@ -19,7 +19,6 @@ def load_to_bq(exec_date,spider_name):
 
 def main():
     spider_name = sys.argv[1]
-    print(spider_name)
     exec_date = datetime.datetime.now().strftime("%Y-%m-%d")
     run_spider(spider_name)
     upload_to_gcs(exec_date,spider_name)
