@@ -19,7 +19,7 @@ SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 
 # Crawl  responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'crawler (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -122,7 +122,7 @@ DOWNLOAD_TIMEOUT = 200
 
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
-LOG_ENABLED = False if ENVIRONMENT == 'prd'  else True
-LOG_LEVEL = 'ERROR' if ENVIRONMENT == 'prd'  else 'ERROR'
+LOG_ENABLED = True if ENVIRONMENT == 'prd'  else True
+LOG_LEVEL = 'DEBUG' if ENVIRONMENT == 'prd'  else 'DEBUG'
 DUPEFILTER_DEBUG = True
 FILE_PATH = os.environ.get('FILE_PATH', 'downloads')

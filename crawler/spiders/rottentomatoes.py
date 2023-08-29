@@ -38,7 +38,7 @@ class RottenTomatoes(scrapy.Spider):
     def start_navigate(self,response):
         data = response.json()
         hasNext = (data.get("pageInfo").get("hasNextPage"))
-        movies_array = data.get("grids")[0].get("list")
+        movies_array = data.get("grid").get("list")
         if movies_array is not None or movies_array != []:
             for movie in movies_array:
                 yield self.parse(movie)

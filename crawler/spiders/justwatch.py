@@ -95,7 +95,7 @@ class JustWatch(scrapy.Spider):
     def start_requests(self):
 
         packages = ["dnp","hbm","nfx","pmp","prv","srp","gop"]
-        packages = ['pmp']
+        # packages = ['pmp']
 
         for pack in packages:
             if pack == "nfx":
@@ -106,12 +106,8 @@ class JustWatch(scrapy.Spider):
         
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2023),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2023})   
             else:
-                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2023,2023),meta={"package":pack,"releaseYearMin":2023,"releaseYearMax":2023})
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2023),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
 
-    
-        
-
-        
 
     def crawl_catalog(self,response):
         data = (response.json())

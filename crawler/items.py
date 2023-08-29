@@ -72,3 +72,20 @@ class FilmowItem(scrapy.Item):
     score = Field()
     number_votes = Field()
     url = Field()
+
+class MetacriticItem(scrapy.Item):    
+    
+    year = Field()
+    title = Field()
+    lower_title = Field()
+    meta_score = Field()
+    meta_score_positive = Field()
+    meta_score_mixed = Field()
+    meta_score_negative = Field()
+    user_score = Field()
+    user_score_positive = Field()
+    user_score_mixed = Field()
+    user_score_negative = Field()
+    runtime = Field()
+    genre = Field()
+    movie_url = Field()
