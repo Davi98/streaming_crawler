@@ -3,7 +3,7 @@ from flatten_json import flatten
 import scrapy
 from scrapy.utils.project import get_project_settings
 from crawler.items import RottenTomatoesItem
-import ast
+import re
 
 
 
@@ -54,7 +54,10 @@ class RottenTomatoes(scrapy.Spider):
 
         item['title'] = data.get('title')
         audienceScore = data.get("audienceScore")
-        
+        original_release_year = data.get('releaseDateText')
+        if original_release_year is not None:
+            original_release_year = original_release_year[original_release_year.find(', '):].replace(', ','')
+        item['original_release_year'] = original_release_year
         if audienceScore is not None:
             item['audienceScore'] = audienceScore.get("score")
             item['audienceScore_sentiment'] = audienceScore.get("sentiment")

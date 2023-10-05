@@ -95,7 +95,7 @@ class JustWatch(scrapy.Spider):
     def start_requests(self):
 
         packages = ["dnp","hbm","nfx","pmp","prv","srp","gop"]
-        # packages = ['pmp']
+        packages = ['pmp']
 
         for pack in packages:
             if pack == "nfx":
@@ -106,7 +106,7 @@ class JustWatch(scrapy.Spider):
         
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2023),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2023})   
             else:
-                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2023),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2021,2023),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
 
 
     def crawl_catalog(self,response):
@@ -140,12 +140,14 @@ class JustWatch(scrapy.Spider):
 
     
     def crawl_webpage_data(self,response):
-        justwatchScore = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[1]/div[2]/div/div[1]/a/text()").get()
-        response.meta['justwatchScore'] = justwatchScore
+        justwatchScore = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[1]/div/div/div[1]/span/text()").get()
+        if justwatchScore is not None:
+            response.meta['justwatchScore'] = int(justwatchScore.replace(" ","").replace("\n", "").replace(",","").replace("%",""))
         response.meta['website_url'] = response.url
-        movie_genre = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[2]/div[2]/span[1]/text()").get()
+        movie_genre = response.xpath("//*[@id=\"base\"]/div[2]/div/div[1]/div/aside/div[1]/div[3]/div[2]/div/text()").get()
         response.meta['movie_genre'] = movie_genre
-        
+
+        print(movie_genre)
         
         yield self.return_movie_data(response.meta)        
         

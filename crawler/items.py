@@ -61,6 +61,8 @@ class RottenTomatoesItem(scrapy.Item):
     criticsScore_sentiment = Field()
     criticsScore_certifiedAttribute = Field()
     lower_title = Field()
+    original_release_year = Field()
+
     
 class FilmowItem(scrapy.Item):
     
