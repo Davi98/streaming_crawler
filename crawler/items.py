@@ -9,22 +9,22 @@ from scrapy import Field
 
 class JustWatchItem(scrapy.Item):
     
-    imdbScore = Field()
+    
     id = Field()
     title = Field()
     full_path = Field()
     website_url = Field()
-    api_url = Field()
     original_release_year = Field()
     object_type = Field()
     original_title = Field()
     age_certification = Field()
     runtime = Field()
     production_countrie = Field()
-    tmbdScore = Field()
     justwatchScore = Field()
-    imbdPopularity = Field()
+    imdbScore = Field()
+    imdbPopularity = Field()
     imdbVotes = Field()
+    tmdbScore = Field()
     tmdbPopularity = Field()
     lower_title = Field()
     movie_genre = Field()

@@ -123,6 +123,6 @@ DOWNLOAD_TIMEOUT = 200
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 LOG_ENABLED = True if ENVIRONMENT == 'prd'  else True
-LOG_LEVEL = 'DEBUG' if ENVIRONMENT == 'prd'  else 'DEBUG'
+LOG_LEVEL = 'INFO' if ENVIRONMENT == 'prd'  else 'DEBUG'
 DUPEFILTER_DEBUG = True
 FILE_PATH = os.environ.get('FILE_PATH', 'downloads')

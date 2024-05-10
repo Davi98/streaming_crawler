@@ -37,8 +37,9 @@ class Metacritic(scrapy.Spider):
         
     def get_number_pages(self,response):
         last_page_number = int(response.xpath('//*[@id="__layout"]/div/div[2]/div[1]/main/section/div[4]/span[2]/span[4]/span/span/span/text()').get().replace(" ","").replace("\n", "").replace(",",""))
-        
+
         movies_links = response.xpath('//*[@id="__layout"]/div/div[2]/div[1]/main/section/div[3]/div/div/a/@href').extract()
+        
 
         if movies_links is not None or movies_links != []:
             for link in movies_links:
@@ -59,7 +60,8 @@ class Metacritic(scrapy.Spider):
         item = MetacriticItem()
         
         
-        title = response.xpath('//*[@id="__layout"]/div/div[2]/div[1]/div[1]/div/div/div[2]/div[3]/div[1]/div/text()').get()
+        title_with_year = response.xpath('//*[@id="__layout"]/div/div[2]/div[1]/div[1]/div/div/div[2]/div[3]/div[1]/div/text()').get()
+
         if title is not None:
             title.replace(" ","").replace("\n", "").replace(",","").strip()
         item['title'] = title
