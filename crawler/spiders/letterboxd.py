@@ -48,7 +48,7 @@ class LetterBoxd(scrapy.Spider):
         for link in movies_links:
             yield scrapy.Request(method="GET",url=self.build_movie_url(link),callback=self.crawl_website_data,meta={"page_number":1})
         
-        for num in range(2,number_pages):
+        for num in range(2,number_pages+2):
             yield scrapy.Request(method="GET",url=self.build_catalog_url(num),callback=self.pre_crawl_website_data,meta={"page_number":num})
     
     def pre_crawl_website_data(self,response):
@@ -59,15 +59,16 @@ class LetterBoxd(scrapy.Spider):
             
     def crawl_website_data(self,response):
         item = LetterboxdItem()
-        item['title'] = response.xpath('//*[@id="featured-film-header"]/h1/text()').get()
-        item['foreign_title'] = response.xpath('//*[@id="featured-film-header"]/p/em/text()').get()
+
+        item['title'] = response.xpath('//*[@id="film-page-wrapper"]/div[2]/section[1]/div/h1/span/text()').get()
+        item['foreign_title'] = response.xpath('//*[@id="film-page-wrapper"]/div[2]/section[1]/div/div/h2/text()').get()
         item['foreign'] = False
         if item['title'] is not None:
             item['lower_title'] =  item['title'].replace(" ","").lower()
         if item['foreign_title'] is not None:
             item['lower_foreign_title'] =  item['foreign_title'].lower()
             item['foreign'] = True
-        item['original_release_year'] = response.xpath('//*[@id="featured-film-header"]/p/small/a/text()').get()
+        item['original_release_year'] = response.xpath('//*[@id="film-page-wrapper"]/div[2]/section[1]/div/div/div/a/text()').get()
 
         raw_text = response.xpath('//script[contains(@type, "application/ld+json")]/text()').get()
 
@@ -83,6 +84,7 @@ class LetterBoxd(scrapy.Spider):
         
     
     def clear_data_text(self,string):
+        print(string)
         if string is not  None or string != "":
             
             string = string.replace("/* <![CDATA[ */","").replace("/* ]]> */","")
