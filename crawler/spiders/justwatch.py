@@ -130,19 +130,20 @@ class JustWatch(scrapy.Spider):
 
     def start_requests(self):
 
-        packages = ["dnp","hbm","nfx","pmp","prv","srp","gop"]
+        packages = ["dnp","mxx","nfx","pmp","prv","srp","gop"]
         # packages = ['dnp']
 
         for pack in packages:
             if pack == "nfx":
-                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2018),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2018})
-                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2019,2024),meta={"package":pack,"releaseYearMin":2019,"releaseYearMax":2023})
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2016),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2016})
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2017,2021),meta={"package":pack,"releaseYearMin":2017,"releaseYearMax":2021})
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2022,2024),meta={"package":pack,"releaseYearMin":2022,"releaseYearMax":2024})
             elif pack == "prv":
                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2015),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2015})
-        
-                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2024),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2023})   
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2016,2021),meta={"package":pack,"releaseYearMin":2016,"releaseYearMax":2021}) 
+                yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,2021,2024),meta={"package":pack,"releaseYearMin":2021,"releaseYearMax":2024})   
             else:
-                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2024),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2023})
+                 yield scrapy.Request(method="POST",url="https://apis.justwatch.com/graphql", callback=self.crawl_catalog,headers=self.header,body=self.build_payload("",pack,1900,2024),meta={"package":pack,"releaseYearMin":1900,"releaseYearMax":2024})
 
 
     def crawl_catalog(self,response):
@@ -215,7 +216,7 @@ class JustWatch(scrapy.Spider):
                     primevideo = True
                 elif offer.get("package").get("shortName") == "dnp":
                     disneyplus = True
-                elif offer.get("package").get("shortName") == "hbm":
+                elif offer.get("package").get("shortName") == "mxx":
                     hbomax = True
                 elif offer.get("package").get("shortName") == "pmp":
                     paramountplus = True
